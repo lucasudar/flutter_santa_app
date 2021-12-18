@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'friends_page.dart';
 
+const String teamNameKey = 'TEAM_NAME';
+
 void main() {
-  runApp(const MyApp());
+  _prepareAndRun();
+}
+
+Future<void> _prepareAndRun() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // SharedPreferences.setMockInitialValues({});
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final teamName = prefs.getString(teamNameKey);
+
+  runApp(MyApp(teamName: teamName));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final String? teamName;
+
+  const MyApp({this.teamName, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +30,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const MyHomePage(title: 'My first Flutter APP'),
+      home: const MyHomePage(),
       routes: {
+        MyHomePage.routeName :(BuildContext context) => const MyHomePage(),
         FriendsPage.routeName :(BuildContext context) => const FriendsPage()
       },
+      initialRoute: teamName == null ? MyHomePage.routeName : FriendsPage.routeName,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+
+  static const routeName = '/home';
+
+  const MyHomePage({Key? key}) : super(key: key);
+
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -44,15 +63,17 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _goNext() {
+  Future<void> _goNext() async {
     Navigator.of(context).pushNamed(FriendsPage.routeName);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(teamNameKey, _controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('Santa'),
       ),
       body: Center(
         child: Column(
