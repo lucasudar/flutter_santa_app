@@ -59,7 +59,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _controller.addListener(() {
-      print(_controller.text);
     });
   }
 
